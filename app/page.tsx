@@ -7,13 +7,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { CalendarIcon, Plus, Trash2, FileText, Download } from 'lucide-react'
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
-import { DayPicker } from "react-day-picker"
 
 // Actualizar la interfaz IntensifySubject para incluir el año/sección donde intensificará
 interface IntensifySubject {
@@ -561,38 +559,18 @@ export default function StudentDocumentGenerator() {
                 </div>
                 <div>
                   <Label className="text-green-700 font-medium">Fecha</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal border-green-200 focus:border-green-500",
-                          !formData.date && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {formData.date ? format(formData.date, "PPP", { locale: es }) : "Seleccionar fecha"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <DayPicker
-                        mode="single"
-                        selected={formData.date}
-                        onSelect={(date) => setFormData(prev => ({ ...prev, date }))}
-                        locale={es}
-                        initialFocus
-                        labels={{
-                          labelMonthDropdown: () => "Mes",
-                          labelYearDropdown: () => "Año",
-                          labelNext: () => "Mes siguiente",
-                          labelPrevious: () => "Mes anterior"
-                        }}
-                        formatters={{
-                          formatCaption: (date) => format(date, "LLLL yyyy", { locale: es })
-                        }}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Input
+                    type="date"
+                    value={formData.date ? format(formData.date, "yyyy-MM-dd") : ""}
+                    onChange={(e) => {
+                      const dateValue = e.target.value
+                      setFormData(prev => ({ 
+                        ...prev, 
+                        date: dateValue ? new Date(dateValue) : undefined 
+                      }))
+                    }}
+                    className="border-green-200 focus:border-green-500"
+                  />
                 </div>
               </div>
             </CardContent>
