@@ -55,6 +55,14 @@ export async function POST(request: NextRequest) {
 
     const yearsText = getYearsForStudy(formData.intensifySubjects, formData.recourseSubjects)
 
+    // Función para formatear los miembros del EDTE con sus cargos
+    const formatEdteMembers = (members: any[]): string => {
+      return members
+        .filter((member) => member.name.trim() && member.position.trim())
+        .map((member) => `${member.name} (${member.position})`)
+        .join(", ")
+    }
+
     const doc = new Document({
       sections: [
         {

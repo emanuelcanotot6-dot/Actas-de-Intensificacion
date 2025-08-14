@@ -25,6 +25,14 @@ export async function POST(request: NextRequest) {
     const logoPath = path.join(process.cwd(), "public", "logo.png")
     const logoBuffer = fs.readFileSync(logoPath)
 
+    // Función para formatear los miembros del EDTE con sus cargos
+    const formatEdteMembers = (members: any[]): string => {
+      return members
+        .filter((member) => member.name.trim() && member.position.trim())
+        .map((member) => `${member.name} (${member.position})`)
+        .join(", ")
+    }
+
     const doc = new Document({
       sections: [
         {
@@ -127,7 +135,7 @@ export async function POST(request: NextRequest) {
             new Paragraph({
               children: [
                 new TextRun({
-                  text: `En el día de la fecha se reúne el EDTE integrado por ${formData.edteMembers.filter((member) => member.trim()).join(", ")}, como instancia de análisis y definición de las trayectorias de las/os estudiantes que, habiendo transitado todas las instancias de intensificación de la enseñanza y el estudio, y teniendo a la fecha más de 4 materias pendientes de aprobación y acreditación, requieren la toma de decisiones respecto de su continuidad de su escolarización.`,
+                  text: `En el día de la fecha se reúne el EDTE integrado por ${formatEdteMembers(formData.edteMembers)}, como instancia de análisis y definición de las trayectorias de las/os estudiantes que, habiendo transitado todas las instancias de intensificación de la enseñanza y el estudio, y teniendo a la fecha más de 4 materias pendientes de aprobación y acreditación, requieren la toma de decisiones respecto de su continuidad de su escolarización.`,
                 }),
               ],
               spacing: { after: 400 },
@@ -362,7 +370,23 @@ export async function POST(request: NextRequest) {
             }),
 
             ...formData.edteMembers
-              .filter((member) => member.trim())
+              .filter((member) => member.name.trim() && member.position.trim())
+              .map(
+                (member) =>
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: `${member.name} (${member.position})`,
+                        bold: true,
+                      }),
+                    ],
+                    spacing: { after: 100 },
+                    alignment: AlignmentType.CENTER,
+                  }),
+              ),
+
+            ...formData.edteMembers
+              .filter((member) => member.name.trim() && member.position.trim())
               .map(
                 () =>
                   new Paragraph({

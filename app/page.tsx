@@ -33,6 +33,12 @@ interface RecourseSubject {
   shift: string
 }
 
+// Agregar interfaz para miembros del EDTE
+interface EdteMember {
+  name: string
+  position: string
+}
+
 interface FormData {
   studentName: string
   studentDNI: string // Agregar este campo
@@ -40,7 +46,7 @@ interface FormData {
   shift: string
   date: Date | undefined
   periodo: string // Agregar este campo
-  edteMembers: string[]
+  edteMembers: EdteMember[] // Cambiar de string[] a EdteMember[]
   intensifySubjects: IntensifySubject[]
   recourseSubjects: RecourseSubject[]
   cannotTakeSubjects: string
@@ -88,6 +94,9 @@ const COURSES = [
   "7° 6°",
   "7° 7°",
 ]
+
+// Definir los cargos disponibles
+const POSITIONS = ["Director/a", "Vicedirector/a", "Jefe de Taller", "Profesor/a"]
 
 // Corregir las materias por año y especialidad, especialmente 7° año
 const SUBJECTS = {
@@ -423,8 +432,8 @@ export default function StudentDocumentGenerator() {
     courseSection: "",
     shift: "",
     date: undefined,
-    periodo: "", // Agregar este campo
-    edteMembers: [""],
+    periodo: "",
+    edteMembers: [{ name: "", position: "" }], // Cambiar estructura inicial
     // En el estado inicial de formData, actualizar intensifySubjects:
     intensifySubjects: [
       {
@@ -477,7 +486,7 @@ export default function StudentDocumentGenerator() {
   const addEdteMember = () => {
     setFormData((prev) => ({
       ...prev,
-      edteMembers: [...prev.edteMembers, ""],
+      edteMembers: [...prev.edteMembers, { name: "", position: "" }],
     }))
   }
 
@@ -490,10 +499,10 @@ export default function StudentDocumentGenerator() {
     }
   }
 
-  const updateEdteMember = (index: number, value: string) => {
+  const updateEdteMember = (index: number, field: "name" | "position", value: string) => {
     setFormData((prev) => ({
       ...prev,
-      edteMembers: prev.edteMembers.map((member, i) => (i === index ? value : member)),
+      edteMembers: prev.edteMembers.map((member, i) => (i === index ? { ...member, [field]: value } : member)),
     }))
   }
 
@@ -771,24 +780,47 @@ export default function StudentDocumentGenerator() {
             </CardHeader>
             <CardContent className="space-y-3 pt-6">
               {formData.edteMembers.map((member, index) => (
-                <div key={index} className="flex gap-2">
-                  <Input
-                    value={member}
-                    onChange={(e) => updateEdteMember(index, e.target.value)}
-                    placeholder={`Integrante ${index + 1}`}
-                    className="border-green-200 focus:border-green-500"
-                  />
-                  {formData.edteMembers.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={() => removeEdteMember(index)}
-                      className="border-red-200 text-red-600 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
+                <div key={index} className="space-y-2">
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <Label className="text-green-700 font-medium text-sm">Nombre</Label>
+                      <Input
+                        value={member.name}
+                        onChange={(e) => updateEdteMember(index, "name", e.target.value)}
+                        placeholder={`Integrante ${index + 1}`}
+                        className="border-green-200 focus:border-green-500"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <Label className="text-green-700 font-medium text-sm">Cargo</Label>
+                      <Select
+                        value={member.position}
+                        onValueChange={(value) => updateEdteMember(index, "position", value)}
+                      >
+                        <SelectTrigger className="border-green-200 focus:border-green-500">
+                          <SelectValue placeholder="Seleccionar cargo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {POSITIONS.map((position) => (
+                            <SelectItem key={position} value={position}>
+                              {position}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {formData.edteMembers.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => removeEdteMember(index)}
+                        className="border-red-200 text-red-600 hover:bg-red-50 mt-6"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
               <Button
